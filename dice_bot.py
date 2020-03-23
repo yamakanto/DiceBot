@@ -8,7 +8,6 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-# client = discord.Client()
 
 class CustomClient(discord.Client):
     async def on_ready(self):
@@ -30,17 +29,21 @@ class CustomClient(discord.Client):
         if message.content[6:].isdecimal():
             dec = int(message.content[6:])
             rand_response = random.randint(1, dec)
-            response = f"random placeholder response to: {rand_response}"
+            response = f"random from 1 to {dec}: {rand_response}"
             await message.channel.send(response)
             return
         message_parts = message.content[6:].split("d")
-        if len(message_parts) != 2:
+        if len(message_parts) != 2 or not message_parts[0].isdecimal() or not message_parts[1].isdecimal():
+            print(f"skipped {message.content}")
             return
         response = f"rolled {message_parts[0]} times d{message_parts[1]}:\nresults:"
         total = 0
         for i in range(int(message_parts[0])):
             rand_res = random.randint(1, int(message_parts[1]))
-            response += " " + str(rand_res)
+            if len(response) + len(str(rand_res)) > 1000:
+                await message.channel.send(response)
+                response = ""
+            response += f" {rand_res}"
             total += rand_res
         response += f"\nTotal: {total}"
         await message.channel.send(response)
